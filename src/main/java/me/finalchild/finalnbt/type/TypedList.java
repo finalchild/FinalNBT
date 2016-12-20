@@ -213,5 +213,6 @@ public class TypedList<T> implements List<T> {
             JsonObject obj = json.getAsJsonObject();
             return new TypedList(TagType.fromId(obj.getAsJsonPrimitive("type").getAsByte()), context.deserialize(obj.get("list"), List.class));
         }
+
     }
 }

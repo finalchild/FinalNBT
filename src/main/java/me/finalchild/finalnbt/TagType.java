@@ -24,6 +24,7 @@
 
 package me.finalchild.finalnbt;
 
+import me.finalchild.finalnbt.exception.DepthException;
 import me.finalchild.finalnbt.type.Compound;
 import me.finalchild.finalnbt.type.TypedList;
 
@@ -147,6 +148,12 @@ public abstract class TagType<T> {
     public static final TagType<TypedList> LIST = new TagType<TypedList>((byte) 9, TypedList.class) {
         @Override
         public TypedList readValue(DataInputStream stream) throws IOException {
+            int depth = FinalNBT.getDepth(stream);
+            if (depth > 511) {
+                throw new DepthException();
+            }
+            FinalNBT.setDepth(stream, depth + 1);
+
             TagType type = TagType.read(stream);
             assert type != null;
             int length = stream.readInt();
@@ -154,6 +161,7 @@ public abstract class TagType<T> {
             for (int i = 0; i < length; i ++) {
                 value.add(type.readValue(stream));
             }
+            FinalNBT.setDepth(stream, depth);
             return value;
         }
 
@@ -170,11 +178,18 @@ public abstract class TagType<T> {
     public static final TagType<Compound> COMPOUND = new TagType<Compound>((byte) 10, Compound.class) {
         @Override
         public Compound readValue(DataInputStream stream) throws IOException {
+            int depth = FinalNBT.getDepth(stream);
+            if (depth > 511) {
+                throw new DepthException();
+            }
+            FinalNBT.setDepth(stream, depth + 1);
+
             Compound value = new Compound();
             NamedTag tag;
             while ((tag = NamedTag.read(stream)).getValue() != null) {
                 value.put(tag.getName(), tag.getValue());
             }
+            FinalNBT.setDepth(stream, depth);
             return value;
         }
 

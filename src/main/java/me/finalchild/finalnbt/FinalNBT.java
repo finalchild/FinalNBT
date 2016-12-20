@@ -38,6 +38,7 @@ import java.util.zip.GZIPOutputStream;
 public class FinalNBT {
 
     private static Map<Class, NBTSerializer> serializers = new HashMap<>();
+    private static Map<DataInputStream, Integer> depths = new HashMap<>();
 
     /**
      * Register an NBTSerializer.
@@ -171,5 +172,23 @@ public class FinalNBT {
      */
     public static <T> Object toTag(T object) {
         return TagType.fromValue(object) != null ? object : serialize(object, (Class<T>) object.getClass());
+    }
+
+    /**
+     * For internal use only.
+     */
+    public static int getDepth(DataInputStream stream) {
+        if (depths.containsKey(stream)) {
+            return depths.get(stream);
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * For internal use only.
+     */
+    public static void setDepth(DataInputStream stream, int depth) {
+        depths.put(stream, depth);
     }
 }
